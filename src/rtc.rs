@@ -88,7 +88,7 @@ impl Memory for Rtc {
                 data[0] = 0x80;
                 Ok(())
             }
-            (DATA_PORT, 0xe...0xff) => {
+            (DATA_PORT, 0xe..=0xff) => {
                 data[0] = 0;
                 Ok(())
             }
@@ -122,7 +122,7 @@ impl Memory for Rtc {
                 self.set_command = data[0] & 0x80 != 0;
                 Ok(())
             }
-            (DATA_PORT, 0xe...0xff) => Ok(()),
+            (DATA_PORT, 0xe..=0xff) => Ok(()),
             (DATA_PORT, x) => {
                 panic!("todo address={}  val={:x}", x, data[0]);
                 //Ok(())

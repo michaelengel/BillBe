@@ -15,12 +15,12 @@ const MODIFIED_BIT: u32 = 0x10;
 
 /// turns a address into a segment table offset
 fn segment_number(address: u32) -> u32 {
-    ((0xFFC0_0000 & address) >> 22)
+    (0xFFC0_0000 & address) >> 22
 }
 
 /// turns a address into a page table offset
 fn page_number(address: u32) -> u32 {
-    ((0x003F_F000 & address) >> 12)
+    (0x003F_F000 & address) >> 12
 }
 
 /// a segment is a address into a offset into a segment
@@ -190,7 +190,7 @@ impl MMU {
             let page = if let Ok(page) = memory.read_u32(page_address + idx * 4) {
                 Page(page)
             } else {
-                return return Err(Error::BusFault {
+                return Err(Error::BusFault {
                                       address: addr,
                                       mode: Mode::Read,
                                       description: BusDescription::PageTableIsNotBacked,
@@ -257,7 +257,7 @@ impl MMU {
                                        address: addr,
                                        mode: Mode::Write,
                                        description: BusDescription::AddressOutOfSegmentBound,
-                                   });;
+                                   });
                     }
 
                     // check if the segment is writable
@@ -341,12 +341,12 @@ impl<'a, M> Memory for (&'a mut MMU, &'a mut M)
     where M: Memory
 {
     fn read(&mut self, vaddr: u32, data: &mut [u8]) -> Result<(), Error> {
-        let paddr = try!(self.0.lookup_read(self.1, vaddr));
+        let paddr = self.0.lookup_read(self.1, vaddr)?;
         self.1.read(paddr, data)
     }
 
     fn write(&mut self, vaddr: u32, data: &[u8]) -> Result<(), Error> {
-        let paddr = try!(self.0.lookup_write(self.1, vaddr));
+        let paddr = self.0.lookup_write(self.1, vaddr)?;
         self.1.write(paddr, data)
     }
 }

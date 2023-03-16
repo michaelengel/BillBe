@@ -90,19 +90,19 @@ pub struct Disasm<'a>(pub Instruction, pub Option<Symbols<'a>>, pub Option<u32>)
 impl<'a> fmt::Display for Disasm<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s: String = match self.0 {
-            Instruction::Dyandic(op, src, dst) => {
+            Instruction::Dyadic(op, src, dst) => {
                 format!("{} {}, {}",
                         op,
                         DisasmMode(src, self.1, self.2),
                         DisasmMode(dst, self.1, self.2))
             }
-            Instruction::Dyandic3(op, src, dst) => {
+            Instruction::Dyadic3(op, src, dst) => {
                 format!("{}3 {}, {}",
                         op,
                         DisasmMode(src, self.1, self.2),
                         DisasmMode(dst, self.1, self.2))
             }
-            Instruction::DyandicI(op, src, dst) => {
+            Instruction::DyadicI(op, src, dst) => {
                 format!("{}i {}, {}",
                         op,
                         DisasmMode(src, self.1, self.2),

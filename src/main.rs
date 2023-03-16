@@ -1,7 +1,5 @@
-extern crate clap;
 extern crate byteorder;
 extern crate xmas_elf;
-#[macro_use]
 extern crate nickel;
 extern crate serde;
 extern crate serde_json;
@@ -13,13 +11,14 @@ mod ofs;
 mod hobbit;
 mod rtc;
 
-use std::fmt::{self, Write};
-use std::sync::{Arc, Mutex};
+use std::fmt::{self};
+// use std::fmt::{self, Write};
+// use std::sync::{Arc, Mutex};
 
 use byteorder::{ByteOrder, BigEndian};
-use clap::{Arg, App};
+// use clap::{App, Arg};
 use xmas_elf::symbol_table::Entry;
-use nickel::{Nickel, HttpRouter};
+// use nickel::{Nickel, HttpRouter};
 
 use ofs::OFSDrive;
 use hobbit::Hobbit;
@@ -151,32 +150,32 @@ pub trait Memory {
 
     fn read_u8(&mut self, addr: u32) -> Result<u8, Error> {
         let mut data = [0u8; 1];
-        try!(self.read(addr, &mut data[..]));
+        self.read(addr, &mut data[..])?;
         Ok(data[0])
     }
     fn read_i8(&mut self, addr: u32) -> Result<i8, Error> {
         let mut data = [0u8; 1];
-        try!(self.read(addr, &mut data[..]));
+        self.read(addr, &mut data[..])?;
         Ok(data[0] as i8)
     }
     fn read_u16(&mut self, addr: u32) -> Result<u16, Error> {
         let mut data = [0u8; 2];
-        try!(self.read(addr, &mut data[..]));
+        self.read(addr, &mut data[..])?;
         Ok(BigEndian::read_u16(&data[..]))
     }
     fn read_i16(&mut self, addr: u32) -> Result<i16, Error> {
         let mut data = [0u8; 2];
-        try!(self.read(addr, &mut data[..]));
+        self.read(addr, &mut data[..])?;
         Ok(BigEndian::read_i16(&data[..]))
     }
     fn read_u32(&mut self, addr: u32) -> Result<u32, Error> {
         let mut data = [0u8; 4];
-        try!(self.read(addr, &mut data[..]));
+        self.read(addr, &mut data[..])?;
         Ok(BigEndian::read_u32(&data[..]))
     }
     fn read_i32(&mut self, addr: u32) -> Result<i32, Error> {
         let mut data = [0u8; 4];
-        try!(self.read(addr, &mut data[..]));
+        self.read(addr, &mut data[..])?;
         Ok(BigEndian::read_i32(&data[..]))
     }
     fn write_u8(&mut self, addr: u32, val: u8) -> Result<(), Error> {
@@ -241,8 +240,8 @@ impl<'a> Memory for MemoryBus<'a> {
                 data[0] = 0x20;
                 Ok(())
             }
-            rtc::ADDR_LOW...rtc::ADDR_HIGH => self.rtc.read(addr, data),
-            0x800_0000...0x880_0000 => {
+            rtc::ADDR_LOW..=rtc::ADDR_HIGH => self.rtc.read(addr, data),
+            0x800_0000..=0x88f_ffff => {
                 let start = addr as usize;
                 let end = start + data.len();
                 if end > 0x880_0000 {
@@ -287,8 +286,8 @@ impl<'a> Memory for MemoryBus<'a> {
                 std::io::Write::write(&mut std::io::stdout(), &data[..1]).unwrap();
                 Ok(())
             }
-            rtc::ADDR_LOW...rtc::ADDR_HIGH => self.rtc.write(addr, data),
-            0x800_0000...0x880_0000 => {
+            rtc::ADDR_LOW..=rtc::ADDR_HIGH => self.rtc.write(addr, data),
+            0x800_0000..=0x87ff_ffff => {
                 let start = addr as usize;
                 let end = start + data.len();
                 if end > 0x880_0000 {
@@ -442,12 +441,14 @@ impl BeBox {
     }
 }
 
+/*
 fn send_index<'a, D>(_: &mut nickel::Request<D>,
                      res: nickel::Response<'a, D>)
                      -> nickel::MiddlewareResult<'a, D> {
     let index = std::path::Path::new("web/index.html");
     res.send_file(index)
 }
+*/
 
 #[derive(Serialize, Deserialize)]
 struct MemoryBlock {
@@ -456,6 +457,7 @@ struct MemoryBlock {
 }
 
 fn main() {
+/*
     let matches = App::new("Billbe")
         .version("0.1")
         .author("Talyxian <me@talyxian.space>")
@@ -466,8 +468,10 @@ fn main() {
                  .takes_value(true)
                  .required(true))
         .get_matches();
+*/
 
-    let path = matches.value_of("disk").expect("no disk args");
+    // let path = matches.value_of("disk").expect("no disk args");
+    let path = "disk.img";
     let file = match std::fs::File::open(path) {
         Ok(file) => file,
         Err(err) => {
